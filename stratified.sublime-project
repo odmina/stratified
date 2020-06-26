@@ -4,5 +4,15 @@
 		{
 			"path": "."
 		}
-	]
+	],
+	"settings":
+	{
+		"LSP":
+		{
+			"rlang":
+			{
+				"enabled": true
+			}
+		}
+	}
 }
