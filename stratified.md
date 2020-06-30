@@ -26,11 +26,11 @@ library(cowplot)
 
 The analysis below is ran on data from case-crossover study. Case-crossover design is similar to case-control design, but there are no control patients. Instead each patient at different time serves as his or her own control. See [M. Maclure and M. A. Mittleman](https://www.annualreviews.org/doi/abs/10.1146/annurev.publhealth.21.1.193) for reference.
 
-I used conditional logistic regression (CLG) from package [survival](https://cran.r-project.org/web/packages/survival/index.html) to test the hypotesis that exposure to a stressful life event can trigger self-poisoning.
+I used conditional logistic regression (CLG) from package [survival](https://cran.r-project.org/web/packages/survival/index.html) to test the hypothesis that exposure to a stressful life event can trigger self-poisoning.
 
 >**Important note**  
->*This analysis is based on simulated data. These are not results of an actual study and no conclusions about the effect of stressful life events on triggering self-poisonig should be drawn from them. I created this notebook only to demonstrate how similar data can be analysed and presented in R. However, sample structure and frequencies of occurrence of stressful life events are based on data from actual, smaller sample of patienst who self-poisoned (n = 124).*
->*Here you can find a refference on life events triggering suicide attempts:*
+>*This analysis is based on simulated data. These are not results of an actual study and no conclusions about the effect of stressful life events on triggering self-poisoning should be drawn from them. I created this notebook only to demonstrate how similar data can be analyzed and presented in R. However, sample structure and frequencies of occurrence of stressful life events are based on data from actual, smaller sample of patients who self-poisoned (n = 124).*
+>*Here you can find a reference on life events triggering suicide attempts:*
 >1. Bagge, C. L., Glenn, C. R., & Lee, H.-J. (2013). Quantifying the impact of recent negative life events on suicide attempts. Journal of Abnormal Psychology, 122(2), 359–368. [https://doi.org/10.1037/a0030371](https://doi.org/10.1037/a0030371)
 >2. Liu, B.-P., Zhang, J., Chu, J., Qiu, H.-M., Jia, C.-X., & Hennessy, D. A. (2019). Negative life events as triggers on suicide attempt in rural China: a case-crossover study. Psychiatry Research, 276, 100–106. [https://doi.org/10.1016/j.psychres.2019.04.008](https://doi.org/10.1016/j.psychres.2019.04.008)
 >3. Conner, K. R., Houston, R. J., Swogger, M. T., Conwell, Y., You, S., He, H., … Duberstein, P. R. (2012). Stressful life events and suicidal behavior in adults with alcohol use disorders: Role of event severity, timing, and type. Drug and Alcohol Dependence, 120(1–3), 155–161. [https://doi.org/10.1016/j.drugalcdep.2011.07.013](https://doi.org/10.1016/j.drugalcdep.2011.07.013)
@@ -39,11 +39,11 @@ There are three groups of variables in the dataset:
 
 1. Variables essential to run conditional logistic regression:
 
-  - **exposure** `TRUE` value indicates that an exposure to a stressful life event occured in a given time window
-  - **outcome** `TRUE` value indicates that an outcome, i.e. self-poisoning occured in the time window
-  - **id** indentifies a patient and is used to identify strata in `clogit` call used to run CLG
+- **exposure** `TRUE` value indicates that an exposure to a stressful life event occurred in a given time window
+- **outcome** `TRUE` value indicates that an outcome, i.e. self-poisoning occurred in the time window
+- **id** identifies a patient and is used to identify strata in `clogit` call used to run CLG
 
-2. **day** is a helper variable identifing case and control days (case day is a day when a patient self-poisoned, for each case day `outcome == TRUE`)
+2. **day** is a helper variable identifying case and control days (case day is a day when a patient self-poisoned, for each case day `outcome == TRUE`)
 3. Grouping variables are used to compare the effect of stressful life events in groups having varying characteristics:
 
 - **women** `TRUE` indicates that a patient is a woman
@@ -59,11 +59,11 @@ events_data <- read_tsv("dataset_.tsv")
 glimpse(events_data)
 ```
 
-## Patient's charcteristics
+## Patient's characteristics
 
 There are 299 unique patients in the dataset.
 
-The code below creates a data frame with information about characteristics of each individual patient (in `events_data` each patient appears eight times). It does it by keeping only the one occurence of each id in the dataset, in this case only the records where `day == "case_day"`.
+The code below creates a data frame with information about characteristics of each individual patient (in `events_data` each patient appears eight times). It does it by keeping only the one occurrence of each id in the dataset, in this case only the records where `day == "case_day"`.
 
 ```R
 patients_data <- events_data %>%
@@ -115,7 +115,7 @@ ggplot(data = exposures_per_day, aes(x = day)) +
   labs(
     x = "Day",
     y = "Number of patients exposed to any stressful event",
-    title = "Patients exposed to any stresful event on case and control days"
+    title = "Patients exposed to any stressful event on case and control days"
   ) +
   theme(axis.text.x = element_text(angle = 30, vjust = 0.5)) +
   scale_fill_manual(values = c("#21908CFF", "#440154FF"))
@@ -123,7 +123,7 @@ ggplot(data = exposures_per_day, aes(x = day)) +
 
 ## Compare numbers of self-poisonings on exposed and unexposed days
 
-Since we are going to compare the odds of self-poisoning on days with and without exposure several times, it is usefull to create a function drawing this plot.
+Since we are going to compare the odds of self-poisoning on days with and without exposure several times, it is useful to create a function drawing this plot.
 
 In the function below using grouping variable is optional.
 
@@ -136,7 +136,7 @@ The function takes the following arguments:
 The function:
 
 1. Checks if `gv` was provided and groups `dtst` by `gv` (if provided), outcome and exposure
-2. Creates a data frame for a plot, with the counts in each group. Since counts are often used in tables summarising data from case-control and case-crossover studies, it also creates character variable `weight_string` to display patient counts on the bars (to my best knowledge displaying it nicely cannot be achieved without creating additional variable)
+2. Creates a data frame for a plot, with the counts in each group. Since counts are often used in tables summarizing data from case-control and case-crossover studies, it also creates character variable `weight_string` to display patient counts on the bars (to my best knowledge displaying it nicely cannot be achieved without creating additional variable)
 3. Draws the plot
 4. If `gv` is provided it uses it for `facet_wrap`.
 
@@ -196,7 +196,7 @@ After all this code it takes only a function call and a title to display the plo
 
 ## Fitting a model
 
-To fit conditional logistic regression model I use `survival::clogit`. Since the logic behind using conditional logistic regression is to take into account inter-patient variablility, patient `id` is provided as strata argument. *Please note that these are not the same strata that are used in the stratified analysis below*.
+To fit conditional logistic regression model I use `survival::clogit`. Since the logic behind using conditional logistic regression is to take into account inter-patient variability, patient `id` is provided as strata argument. *Please note that these are not the same strata that are used in the stratified analysis below*.
 
 ```R
 #all data model
@@ -413,7 +413,7 @@ mutate(grouping_var_rr = paste0(grouping_var,
   stars))
 ```
 
-The data frame is plotted with `ggplot::geom_point()`, where points represent ORs and `ggpolot:error_bar()`, where bars represent confidence intervals.
+The data frame is plotted with `ggplot::geom_point()`, where points represent ORs and `ggplot:error_bar()`, where bars represent confidence intervals.
 
 As you can see, overlapping error bars translate to non-significant RR.
 
