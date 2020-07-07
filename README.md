@@ -1,2 +1,14 @@
 # stratified
-Code for stratified logistic regression
+
+## Goal
+This repository presents a way to analyze and present case-crossover data in R. 
+
+## Data disclaimer
+
+**My goal was not to report study results, but to present how to analyze data! Thus any outcome presented in this repository should not be considered as providing any knowledge on the subject of life stress triggering self-poisoning.** Data used to present the analyzis were simulated using information about patient characteristics from a smaller study (initial report here: https://pubmed.ncbi.nlm.nih.gov/24466692/). 
+
+## Analysis scope
+
+I used condidtional logistic regression (CLG) to determine if exposure (in this example stressful life event) triggers the outcome (in this example intentional self-poisoning). 
+
+To verify if the effect is more or less pronounced in various groups (eg. women vs men or depressed vs non-depressed patients) I used stratified analyzis. Statistical sigifficance of the differences between strata was verified by including interaction term of the characteristic in question and exposure in the CLG model.
