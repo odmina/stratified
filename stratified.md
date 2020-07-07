@@ -30,22 +30,19 @@ I used conditional logistic regression (CLG) from package [survival](https://cra
 
 >**Important note**  
 >*This analysis is based on simulated data. These are not results of an actual study and no conclusions about the effect of stressful life events on triggering self-poisoning should be drawn from them. I created this notebook only to demonstrate how similar data can be analyzed and presented in R. However, sample structure and frequencies of occurrence of stressful life events are based on data from actual, smaller sample of patients who self-poisoned (n = 124).*
->*Here you can find a reference on life events triggering suicide attempts:*
->1. Bagge, C. L., Glenn, C. R., & Lee, H.-J. (2013). Quantifying the impact of recent negative life events on suicide attempts. Journal of Abnormal Psychology, 122(2), 359–368. [https://doi.org/10.1037/a0030371](https://doi.org/10.1037/a0030371)
->2. Liu, B.-P., Zhang, J., Chu, J., Qiu, H.-M., Jia, C.-X., & Hennessy, D. A. (2019). Negative life events as triggers on suicide attempt in rural China: a case-crossover study. Psychiatry Research, 276, 100–106. [https://doi.org/10.1016/j.psychres.2019.04.008](https://doi.org/10.1016/j.psychres.2019.04.008)
+>*Here you can find a reference on life events triggering suicide attempts:*  
+>1. Bagge, C. L., Glenn, C. R., & Lee, H.-J. (2013). Quantifying the impact of recent negative life events on suicide attempts. Journal of Abnormal Psychology, 122(2), 359–368. [https://doi.org/10.1037/a0030371](https://doi.org/10.1037/a0030371)  
+>2. Liu, B.-P., Zhang, J., Chu, J., Qiu, H.-M., Jia, C.-X., & Hennessy, D. A. (2019). Negative life events as triggers on suicide attempt in rural China: a case-crossover study. Psychiatry Research, 276, 100–106. [https://doi.org/10.1016/j.psychres.2019.04.008](https://doi.org/10.1016/j.psychres.2019.04.008)  
 >3. Conner, K. R., Houston, R. J., Swogger, M. T., Conwell, Y., You, S., He, H., … Duberstein, P. R. (2012). Stressful life events and suicidal behavior in adults with alcohol use disorders: Role of event severity, timing, and type. Drug and Alcohol Dependence, 120(1–3), 155–161. [https://doi.org/10.1016/j.drugalcdep.2011.07.013](https://doi.org/10.1016/j.drugalcdep.2011.07.013)
 
 There are three groups of variables in the dataset:
 
 1. Variables essential to run conditional logistic regression:
-
 - **exposure** `TRUE` value indicates that an exposure to a stressful life event occurred in a given time window
 - **outcome** `TRUE` value indicates that an outcome, i.e. self-poisoning occurred in the time window
 - **id** identifies a patient and is used to identify strata in `clogit` call used to run CLG
-
 2. **day** is a helper variable identifying case and control days (case day is a day when a patient self-poisoned, for each case day `outcome == TRUE`)
 3. Grouping variables are used to compare the effect of stressful life events in groups having varying characteristics:
-
 - **women** `TRUE` indicates that a patient is a woman
 - **psychiatric_history** `TRUE` indicates that a patient has a history of psychiatric consultation
 - **depression** `TRUE` indicates that a patient was ever diagnosed with depression
@@ -115,10 +112,11 @@ ggplot(data = exposures_per_day, aes(x = day)) +
   labs(
     x = "Day",
     y = "Number of patients exposed to any stressful event",
-    title = "Patients exposed to any stressful event on case and control days"
+    title = "Patients exposed to any stressful event on case and control days",
+    fill = element_blank()
   ) +
   theme(axis.text.x = element_text(angle = 30, vjust = 0.5)) +
-  scale_fill_manual(values = c("#21908CFF", "#440154FF"))
+  scale_fill_manual(values = c("#21908CFF", "#440154FF"), labels = c("no self-poisoning", "self-poisoning"))
 ```
 
 ## Compare numbers of self-poisonings on exposed and unexposed days
@@ -219,7 +217,8 @@ plots_for_grid <- function(plot) {
           axis.title.x = element_blank(),
           axis.text.x = element_blank()
          ) +
-    labs(title = element_blank())
+    labs(title = element_blank(),
+      x = "stressful life event")
   return(new_plot)
 }
 ```
@@ -264,7 +263,7 @@ title <- ggdraw() +
 Title and legend are aligned in a grid along with plots. Bottom plot is modified to have x axis (other plots do not have it, so it can be displayed only once at the bottom). To preserve bars width in rel_heights parameter it takes some more space.
 
 ```R
-options(repr.plot.width = 6, repr.plot.height = 11)
+options(repr.plot.width = 6, repr.plot.height = 9)
 plot_grid(title,
   legend,
   plot_women,
@@ -275,8 +274,9 @@ plot_grid(title,
       plot.margin = margin(l = 20, r = 10, t = 0, b = 20),
       axis.title.x = element_text()),
   ncol = 1,
-  rel_heights = c(0.2, 0.1, 1.5, 1.5, 1.5, 2.2)
+  rel_heights = c(0.4, 0.4, 1.5, 1.5, 1.5, 2.1)
   )
+options(repr.plot.width = 7, repr.plot.height = 5)
 ```
 
 ## Stratified ORs
@@ -314,10 +314,12 @@ OR among women:
 The code below extracts `exp(coef)` from the summary of the model `men` and `women`, then extracts RR from the model with interaction and does the algebra necessary to show that `exp(coef)` is indeed RR.
 
 ```R
-(m <- summary(men)$coefficients[2])
-(w <- summary(women)$coefficients[2])
+m <- summary(men)$coefficients[2]
+w <- summary(women)$coefficients[2]
 i <- summary(interaction)$coefficients[3, 2]
-m * i
+round(m, 5)
+round(w, 5)
+round(m * i, 5)
 ```
 
 In this example RR is not statistically significant, so the data do not let us assume that the effect of stressful life events on triggering self poisoning is indeed more pronounced among women.
@@ -392,7 +394,8 @@ women_ORs <- ORs_in_groups(events_data, "women")
 psychiatric_history_ORs <- ORs_in_groups(events_data, "psychiatric_history")
 depression_ORs <- ORs_in_groups(events_data, "depression")
 attempts_ORs <- ORs_in_groups(events_data, "attempts")
-(stratified_ORs <- rbind(women_ORs, psychiatric_history_ORs, depression_ORs, attempts_ORs))
+stratified_ORs <- rbind(women_ORs, psychiatric_history_ORs, depression_ORs, attempts_ORs)
+glimpse(stratified_ORs)
 ```
 
 ### Plotting ORs
