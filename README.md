@@ -7,7 +7,7 @@ This repository presents a way to analyze and present case-crossover data in R.
 
 **My goal was not to report study results, but to present how to analyze data! Thus any outcome presented in this repository should not be considered as providing any knowledge on the subject of life stress triggering self-poisoning.** Data used to present the analyzis were simulated using information about patient characteristics from a smaller study (initial report here: https://pubmed.ncbi.nlm.nih.gov/24466692/). 
 
-## Analysis scope
+## Scope of the analysis
 
 I used condidtional logistic regression (CLG) to determine if exposure (in this example stressful life event) triggers the outcome (in this example intentional self-poisoning). 
 
